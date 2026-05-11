@@ -1,0 +1,150 @@
+---
+
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import PostCard from '@/components/ui/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { sharedSlug } from '@/content/config';
+import { type Locale } from '@/consts';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const CATEGORIES = ['homelab', 'tutorial', 'career', 'til'] as const;
+const isDev = import.meta.env.DEV;
+
+const all = await getCollection('blog', ({ id, data }) => {
+  if (!id.startsWith(`${locale}/`)) return false;
+  return isDev || !data.draft;
+});
+
+const posts = all
+  .slice()
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const presentCategories = new Set(posts.map((p) => p.data.category));
+
+const bannerArt = [
+  ' _   _',
+  '| |_| |___  __ _',
+  "| '_\\ / _ \\/ _` |",
+  '|_.__/_\\___/\\__, |',
+  '            |___/',
+].join('\n');
+---
+
+<Base
+  title={t('blog.title', locale)}
+  description={t('blog.description', locale)}
+  locale={locale}
+>
+  <Banner srLabel={t('blog.title', locale)}>{bannerArt}</Banner>
+
+  <p>
+    {t('blog.intro.before', locale)} <a href="/rss.xml">{t('home.rss', locale)}</a>.
+  </p>
+
+  <AsciiDivider />
+
+  {posts.length === 0 ? (
+    <p class="empty">{t('blog.empty', locale)}</p>
+  ) : (
+    <>
+      <div class="filter" role="group" aria-label={t('blog.filter.label', locale)}>
+        <button
+          type="button"
+          class="filter__chip"
+          data-filter="all"
+          aria-pressed="true"
+        >[{t('blog.filter.all', locale)}]</button>
+        {CATEGORIES.filter((c) => presentCategories.has(c)).map((c) => (
+          <button
+            type="button"
+            class="filter__chip"
+            data-filter={c}
+            aria-pressed="false"
+          >[{c}]</button>
+        ))}
+      </div>
+
+      <ul class="post-list" role="list" data-active="all" id="post-list">
+        {posts.map((p) => (
+          <li class="post-list__item" data-category={p.data.category}>
+            <PostCard
+              href={`/${locale}/blog/${sharedSlug(p)}`}
+              title={p.data.title}
+              pubDate={p.data.pubDate}
+              category={p.data.category}
+              summary={p.data.summary}
+              tags={p.data.tags}
+            />
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</Base>
+
+<script>
+  function bindBlogFilter() {
+    const list = document.getElementById('post-list');
+    const chips = document.querySelectorAll<HTMLButtonElement>('.filter__chip');
+    if (!list || !chips.length) return;
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter ?? 'all';
+        list.setAttribute('data-active', filter);
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      });
+    });
+  }
+  bindBlogFilter();
+  document.addEventListener('astro:page-load', bindBlogFilter);
+</script>
+
+<style>
+  .empty { color: var(--fg-dim); }
+
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+    margin: 0 0 var(--space-3);
+  }
+  .filter__chip {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--fg-dim);
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .filter__chip:hover { color: var(--fg); }
+  .filter__chip[aria-pressed='true'] {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .post-list__item { margin: 0; }
+
+  .post-list[data-active='homelab'] .post-list__item:not([data-category='homelab']),
+  .post-list[data-active='tutorial'] .post-list__item:not([data-category='tutorial']),
+  .post-list[data-active='career']   .post-list__item:not([data-category='career']),
+  .post-list[data-active='til']      .post-list__item:not([data-category='til']) {
+    display: none;
+  }
+</style>

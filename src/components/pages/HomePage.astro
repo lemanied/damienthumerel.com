@@ -1,0 +1,199 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import ProjectCard from '@/components/ui/ProjectCard.astro';
+import PostCard from '@/components/ui/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { sharedSlug } from '@/content/config';
+import { SITE, type Locale } from '@/consts';
+import { t, localizePath } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const bannerArt = [
+  '     _            _            _   _                          _',
+  '  __| |__ _ _ __ (_)___ _ _   | |_| |_ _  _ _ __  ___ _ _ ___| |',
+  " / _` / _` | '  \\| / -_) ' \\  |  _| ' \\ || | '  \\/ -_) '_/ -_) |",
+  ' \\__,_\\__,_|_|_|_|_\\___|_||_|  \\__|_||_\\_,_|_|_|_\\___|_| \\___|_|',
+].join('\n');
+
+const isDev = import.meta.env.DEV;
+
+
+const allProjects = await getCollection('projects', ({ id, data }) => {
+  void data;
+  return id.startsWith('en/') || id.startsWith('fr/');
+});
+const projectsByLocale = (loc: Locale) => allProjects.filter((p) => p.id.startsWith(`${loc}/`));
+
+const localeProjects = projectsByLocale(locale);
+const seenSlugs = new Set(localeProjects.map(sharedSlug));
+const featuredFromLocale = localeProjects.filter((p) => p.data.featured);
+const featuredFallback = locale === 'fr'
+  ? projectsByLocale('en').filter((p) => p.data.featured && !seenSlugs.has(sharedSlug(p)))
+  : [];
+const featured = [...featuredFromLocale, ...featuredFallback]
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
+const allPosts = await getCollection('blog', ({ id, data }) => {
+  if (!id.startsWith('en/') && !id.startsWith('fr/')) return false;
+  return isDev || !data.draft;
+});
+const localePosts = allPosts.filter((p) => p.id.startsWith(`${locale}/`));
+const seenPostSlugs = new Set(localePosts.map(sharedSlug));
+const postsFallback = locale === 'fr'
+  ? allPosts.filter((p) => p.id.startsWith('en/') && !seenPostSlugs.has(sharedSlug(p)))
+  : [];
+const latestPosts = [...localePosts, ...postsFallback]
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 3);
+---
+
+<Base
+  title={t('home.title', locale)}
+  description={SITE.description[locale]}
+  locale={locale}
+  person
+>
+  <Banner srLabel={SITE.name}>{bannerArt}</Banner>
+
+  <p class="tagline">{SITE.tagline[locale]}</p>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="currently">
+    <Prompt label={t('home.currently', locale)} id="currently" />
+    <ul class="plain-list">
+      <li>{t('home.currently.line1', locale)}</li>
+    </ul>
+    <p class="meta">
+      <a href={localizePath('/now', locale)}>/now</a> &middot; {t('home.currently.meta', locale)}
+    </p>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="featured-projects">
+    <Prompt label={t('home.featured', locale)} id="featured-projects" />
+    {featured.length === 0 ? (
+      <p class="meta">{t('home.featured.empty', locale)}</p>
+    ) : (
+      <ul class="card-list" role="list">
+        {featured.map((p) => {
+          const slug = sharedSlug(p);
+          const entryLoc: Locale = p.id.startsWith('fr/') ? 'fr' : 'en';
+          return (
+            <li>
+              <ProjectCard
+                href={`/${entryLoc}/projects/${slug}`}
+                title={p.data.title}
+                status={p.data.status}
+                role={p.data.role}
+                year={p.data.year}
+                summary={p.data.summary}
+                tech={p.data.tech}
+                featured
+              />
+            </li>
+          );
+        })}
+      </ul>
+    )}
+    <p class="meta">
+      <a href={localizePath('/projects', locale)}>{t('home.featured.all', locale)}</a>
+    </p>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="latest-posts">
+    <Prompt label={t('home.latest', locale)} id="latest-posts" />
+    {latestPosts.length === 0 ? (
+      <p class="meta">{t('home.latest.empty', locale)}</p>
+    ) : (
+      <ul class="post-list" role="list">
+        {latestPosts.map((post) => {
+          const slug = sharedSlug(post);
+          const entryLoc: Locale = post.id.startsWith('fr/') ? 'fr' : 'en';
+          return (
+            <li>
+              <PostCard
+                href={`/${entryLoc}/blog/${slug}`}
+                title={post.data.title}
+                pubDate={post.data.pubDate}
+                category={post.data.category}
+                summary={post.data.summary}
+              />
+            </li>
+          );
+        })}
+      </ul>
+    )}
+    <p class="meta">
+      <a href={localizePath('/blog', locale)}>{t('home.latest.all', locale)}</a>
+      &middot; <a href="/rss.xml">{t('home.rss', locale)}</a>
+    </p>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="contact">
+    <Prompt label={t('home.contact', locale)} id="contact" />
+    <p>
+      {t('home.contact.cta.before', locale)}
+      <a href={localizePath('/contact', locale)}>/contact</a>
+      {' '}{t('home.contact.cta.middle', locale)}{' '}
+      <a href={`mailto:${'damien.thumerel@gmail.com'}`}>damien.thumerel@gmail.com</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .tagline {
+    color: var(--fg-dim);
+    margin: 0 0 var(--space-2);
+    font-size: 1rem;
+  }
+  .plain-list {
+    list-style: none;
+    margin: 0 0 var(--space-2);
+    padding: 0;
+  }
+  .plain-list > li {
+    padding-left: var(--space-2);
+    position: relative;
+  }
+  .plain-list > li::before {
+    content: '│ ';
+    color: var(--border);
+    position: absolute;
+    left: 0;
+  }
+  .meta {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    margin: var(--space-2) 0 0;
+  }
+
+  .card-list,
+  .post-list {
+    list-style: none;
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  @media (min-width: 768px) {
+    .card-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .post-list { gap: var(--space-3); }
+</style>

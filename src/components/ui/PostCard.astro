@@ -1,0 +1,76 @@
+---
+import Tag from '@/components/ui/Tag.astro';
+
+interface Props {
+  href: string;
+  title: string;
+  pubDate: Date;
+  category: string;
+  summary: string;
+  tags?: readonly string[];
+  readingTime?: number;
+}
+
+const { href, title, pubDate, category, summary, tags = [], readingTime } = Astro.props;
+const iso = pubDate.toISOString().slice(0, 10);
+---
+
+<article class="post" data-category={category}>
+  <a href={href} class="post__title">{title}</a>
+  <p class="post__meta">
+    <time datetime={iso}>{iso}</time>
+    <span aria-hidden="true"> &middot; </span>
+    <Tag label={category} tone="dim" />
+    {readingTime != null && (
+      <>
+        <span aria-hidden="true"> &middot; </span>
+        <span>{readingTime} min read</span>
+      </>
+    )}
+  </p>
+  <p class="post__summary">{summary}</p>
+  {tags.length > 0 && (
+    <p class="post__tags" aria-label="tags">
+      {tags.map((t) => <Tag label={t} tone="dim" />)}
+    </p>
+  )}
+</article>
+
+<style>
+  .post {
+    padding-left: var(--space-2);
+    position: relative;
+  }
+  .post::before {
+    content: '├─ ';
+    color: var(--border);
+    position: absolute;
+    left: 0;
+  }
+  .post__title {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .post__title:hover { text-decoration: underline; }
+  .post__meta {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    margin: var(--space-1) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-1);
+  }
+  .post__meta time { color: var(--fg); }
+  .post__summary {
+    margin: var(--space-1) 0 0;
+    color: var(--fg);
+  }
+  .post__tags {
+    margin: var(--space-1) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-1);
+  }
+</style>

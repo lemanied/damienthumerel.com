@@ -1,0 +1,33 @@
+---
+interface Props {
+  label: string;
+  level?: 1 | 2 | 3;
+  as?: 'h2' | 'h3' | 'h4' | 'div';
+  id?: string;
+}
+
+const { label, level = 1, as = 'h2', id } = Astro.props as Props;
+const prefix = '>'.repeat(level) + ' ';
+const Tag = as;
+---
+
+<Tag class="prompt" id={id}>
+  <span class="prompt__prefix" aria-hidden="true">{prefix}</span><span class="prompt__label">{label}</span>
+</Tag>
+
+<style>
+  .prompt {
+    color: var(--accent);
+    font-weight: 700;
+    margin: var(--space-3) 0 var(--space-2);
+    line-height: 1.3;
+    font-size: 1.15rem;
+  }
+  .prompt__prefix {
+    color: var(--accent);
+    margin-right: 0.25ch;
+  }
+  .prompt__label {
+    color: var(--accent);
+  }
+</style>

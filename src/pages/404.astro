@@ -1,0 +1,63 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+---
+
+<Base
+  title="404"
+  description="Page not found."
+  noindex
+>
+  <Banner srLabel="404 - signal lost">
+    {[
+      ' _  _    ___  _  _   ',
+      '| || |  / _ \\| || |  ',
+      '| || |_| | | | || |_ ',
+      '|__   _| |_| |__   _|',
+      '   |_|  \\___/   |_|  ',
+    ].join('\n')}
+  </Banner>
+
+  <p class="lead">
+    <span class="lead__en">404 - signal lost.</span>
+    <span class="lead__fr">404 - signal perdu.</span>
+  </p>
+
+  <p>
+    The page you asked for is not here. It may have been renamed, never
+    existed, or was archived while tidying. Head back to <a href="/en/">/en/</a> or <a href="/fr/">/fr/</a>.
+  </p>
+  <p class="fr-note">
+    La page demandée est introuvable. Elle a peut-être été renommée, n'a
+    jamais existé, ou a été archivée. Retour à <a href="/en/">/en/</a> ou <a href="/fr/">/fr/</a>.
+  </p>
+
+  <p class="tip">
+    <span aria-hidden="true">&gt; </span>tip: try <a href="/_term" data-astro-reload>/_term</a>
+  </p>
+</Base>
+
+<style>
+  .lead {
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+  }
+  .lead__en, .lead__fr {
+    display: block;
+  }
+  .lead__fr {
+    color: var(--fg-dim);
+    font-weight: 400;
+  }
+  .fr-note {
+    color: var(--fg-dim);
+  }
+  .tip {
+    color: var(--fg-dim);
+    margin-top: var(--space-3);
+  }
+  .tip a {
+    color: var(--accent);
+  }
+</style>

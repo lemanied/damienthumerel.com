@@ -1,0 +1,180 @@
+---
+import Base from '@/layouts/Base.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import Tag from '@/components/ui/Tag.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { sharedSlug } from '@/content/config';
+import { t } from '@/i18n/ui';
+
+const LOCALE = 'en' as const;
+
+export async function getStaticPaths() {
+  const isDev = import.meta.env.DEV;
+  const en = await getCollection('blog', ({ id, data }) => {
+    if (!id.startsWith('en/')) return false;
+    return isDev || !data.draft;
+  });
+  const sorted = en
+    .slice()
+    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+  return sorted.map((entry, i) => ({
+    params: { slug: sharedSlug(entry) },
+    props: {
+      entry,
+      newer: i > 0 ? sorted[i - 1] : undefined,
+      older: i < sorted.length - 1 ? sorted[i + 1] : undefined,
+    },
+  }));
+}
+
+type Entry = CollectionEntry<'blog'>;
+interface Props {
+  entry: Entry;
+  newer?: Entry;
+  older?: Entry;
+}
+
+const { entry, newer, older } = Astro.props as Props;
+const { Content, remarkPluginFrontmatter } = await entry.render();
+const { title, pubDate, updatedDate, summary, tags, category, draft } = entry.data;
+
+const pubIso = pubDate.toISOString().slice(0, 10);
+const updatedIso = updatedDate?.toISOString().slice(0, 10);
+
+const readingTime = (() => {
+  const explicit = (remarkPluginFrontmatter as { readingTime?: number } | undefined)?.readingTime;
+  if (typeof explicit === 'number') return explicit;
+  const words = entry.body.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 225));
+})();
+---
+
+<Base
+  title={title}
+  description={summary}
+  locale={LOCALE}
+  noindex={draft}
+>
+  <h1 class="post-title">
+    <span aria-hidden="true">&gt; </span>{title}
+  </h1>
+
+  <p class="post-meta" aria-label={t('blog.meta.label', LOCALE)}>
+    <time datetime={pubIso}>{pubIso}</time>
+    {updatedIso && (
+      <>
+        <span aria-hidden="true"> &middot; </span>
+        <span>{t('blog.meta.updated', LOCALE)} <time datetime={updatedIso}>{updatedIso}</time></span>
+      </>
+    )}
+    <span aria-hidden="true"> &middot; </span>
+    <Tag label={category} tone="dim" />
+    <span aria-hidden="true"> &middot; </span>
+    <span>{readingTime} {t('blog.detail.read_min', LOCALE)}</span>
+    {draft && (
+      <>
+        <span aria-hidden="true"> &middot; </span>
+        <span class="post-meta__draft">{t('blog.detail.draft', LOCALE)}</span>
+      </>
+    )}
+  </p>
+
+  {tags.length > 0 && (
+    <p class="post-tags" aria-label={t('blog.tags.label', LOCALE)}>
+      {tags.map((tg) => <Tag label={tg} tone="dim" />)}
+    </p>
+  )}
+
+  <AsciiDivider />
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="discuss">
+    <Prompt label={t('blog.detail.discuss', LOCALE)} id="discuss" />
+    <p>
+      {t('blog.detail.discuss.body.before', LOCALE)}
+      <a href="mailto:damien.thumerel@gmail.com">damien.thumerel@gmail.com</a>.
+    </p>
+  </section>
+
+  <AsciiDivider />
+
+  <nav class="pager" aria-label="adjacent posts">
+    <div class="pager__prev">
+      {older ? (
+        <a href={`/${LOCALE}/blog/${sharedSlug(older)}`}>
+          <span aria-hidden="true">&larr; </span>{older.data.title}
+        </a>
+      ) : (
+        <span class="pager__empty">{t('blog.detail.pager.oldest', LOCALE)}</span>
+      )}
+    </div>
+    <div class="pager__next">
+      {newer ? (
+        <a href={`/${LOCALE}/blog/${sharedSlug(newer)}`}>
+          {newer.data.title}<span aria-hidden="true"> &rarr;</span>
+        </a>
+      ) : (
+        <span class="pager__empty">{t('blog.detail.pager.newest', LOCALE)}</span>
+      )}
+    </div>
+  </nav>
+
+  <p class="back"><a href={`/${LOCALE}/blog`}>{t('blog.detail.back', LOCALE)}</a></p>
+</Base>
+
+<style>
+  .post-title {
+    color: var(--accent);
+    font-size: 1.4rem;
+    margin: var(--space-2) 0 var(--space-1);
+    line-height: 1.3;
+  }
+  .post-meta {
+    color: var(--fg-dim);
+    font-size: 0.95rem;
+    margin: 0 0 var(--space-1);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-1);
+  }
+  .post-meta time { color: var(--fg); }
+  .post-meta__draft { color: var(--danger); font-weight: 500; }
+
+  .post-tags {
+    margin: 0 0 var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-1);
+  }
+
+  .prose :global(h2) {
+    font-size: 1.15rem;
+    margin: var(--space-3) 0 var(--space-1);
+  }
+  .prose :global(h2::before) { content: '>> '; color: var(--accent); }
+  .prose :global(h3) { font-size: 1.05rem; }
+  .prose :global(h3::before) { content: '>>> '; color: var(--accent); }
+
+  .pager {
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: 1fr 1fr;
+    margin: var(--space-2) 0;
+  }
+  .pager__prev { text-align: left; }
+  .pager__next { text-align: right; }
+  .pager__empty { color: var(--fg-dim); }
+
+  .back {
+    color: var(--fg-dim);
+    margin: var(--space-2) 0 0;
+  }
+</style>

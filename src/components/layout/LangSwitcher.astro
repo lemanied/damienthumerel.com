@@ -1,0 +1,55 @@
+---
+import type { Locale } from '@/consts';
+import { altUrls } from '@/i18n/altUrl';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale?: Locale;
+  currentPath?: string;
+}
+
+const { locale = 'en', currentPath = Astro.url.pathname } = Astro.props;
+const links = await altUrls(currentPath);
+---
+
+<div class="lang" aria-label={t('lang.label', locale)}>
+  <span class="lang__prefix" aria-hidden="true">[</span>
+  <a
+    href={links.en}
+    hreflang="en"
+    lang="en"
+    aria-current={locale === 'en' ? 'true' : undefined}
+    class:list={['lang__link', { 'lang__link--active': locale === 'en' }]}
+  >en</a>
+  <span class="lang__sep" aria-hidden="true">|</span>
+  <a
+    href={links.fr}
+    hreflang="fr"
+    lang="fr"
+    aria-current={locale === 'fr' ? 'true' : undefined}
+    class:list={['lang__link', { 'lang__link--active': locale === 'fr' }]}
+  >fr</a>
+  <span class="lang__prefix" aria-hidden="true">]</span>
+</div>
+
+<style>
+  .lang {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .lang__prefix,
+  .lang__sep {
+    color: var(--border);
+    margin: 0 0.25ch;
+  }
+  .lang__link {
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+  .lang__link:hover { color: var(--accent); }
+  .lang__link--active {
+    color: var(--accent);
+    font-weight: 700;
+  }
+</style>

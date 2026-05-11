@@ -1,0 +1,75 @@
+---
+import StatusBadge from '@/components/ui/StatusBadge.astro';
+import Tag from '@/components/ui/Tag.astro';
+
+type Status = 'active' | 'archived' | 'past';
+
+interface Props {
+  href: string;
+  title: string;
+  status: Status;
+  role: string;
+  year: number | string;
+  summary: string;
+  tech: readonly string[];
+  featured?: boolean;
+}
+
+const { href, title, status, role, year, summary, tech, featured = false } = Astro.props;
+---
+
+<article class="card">
+  <div class="card__head">
+    {featured && <span class="card__star" aria-hidden="true">[*] </span>}
+    <a href={href} class="card__title">{title}</a>
+    <StatusBadge status={status} />
+  </div>
+  <p class="card__meta">
+    <span>{role}</span> &middot; <span>{year}</span>
+  </p>
+  <p class="card__summary">{summary}</p>
+  {tech.length > 0 && (
+    <p class="card__tags">
+      {tech.map((t) => <Tag label={t} tone="dim" />)}
+    </p>
+  )}
+</article>
+
+<style>
+  .card {
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-1);
+  }
+  .card__star { color: var(--accent); }
+  .card__title {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+    margin-right: var(--space-1);
+  }
+  .card__title:hover { text-decoration: underline; }
+  .card__meta {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  .card__summary {
+    margin: 0;
+  }
+  .card__tags {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-1);
+  }
+</style>

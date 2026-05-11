@@ -1,0 +1,89 @@
+---
+import { SITE, type Locale } from '@/consts';
+
+interface Props {
+  title?: string;
+  description?: string;
+  locale?: Locale;
+  ogImage?: string;
+  noindex?: boolean;
+  person?: boolean;
+}
+
+const {
+  title,
+  description,
+  locale = SITE.defaultLocale,
+  ogImage = SITE.ogImage,
+  noindex = false,
+  person = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title} - ${SITE.titleSuffix}` : SITE.titleSuffix;
+const desc = description ?? SITE.description[locale];
+const canonical = new URL(Astro.url.pathname, SITE.url).toString();
+const ogImageUrl = new URL(ogImage, SITE.url).toString();
+
+const personLd = person
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: SITE.name,
+      url: SITE.url,
+      jobTitle: locale === 'fr'
+        ? 'Généraliste IT / systèmes'
+        : 'IT / systems generalist',
+      description: SITE.description[locale],
+      image: ogImageUrl,
+      sameAs: ['https://github.com/lemanied'],
+    }
+  : null;
+
+const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined;
+const cfAnalyticsConfig = cfAnalyticsToken
+  ? JSON.stringify({ token: cfAnalyticsToken })
+  : null;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{fullTitle}</title>
+<meta name="description" content={desc} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta name="theme-color" content="#0b0b0b" />
+<meta name="color-scheme" content="dark" />
+
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={desc} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={locale === 'fr' ? 'fr_CA' : 'en_CA'} />
+
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<link rel="alternate" type="application/rss+xml" title={`${SITE.name} - blog`} href="/rss.xml" />
+
+
+<link rel="preload" href="/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/JetBrainsMono-Bold.woff2"    as="font" type="font/woff2" crossorigin />
+
+<link rel="stylesheet" href="/fonts.css" />
+
+<meta name="generator" content={Astro.generator} />
+
+{personLd && (
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(personLd)} />
+)}
+
+{cfAnalyticsConfig && (
+  <script
+    is:inline
+    defer
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon={cfAnalyticsConfig}
+  />
+)}

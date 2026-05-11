@@ -1,0 +1,173 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import ProjectCard from '@/components/ui/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { sharedSlug } from '@/content/config';
+import { type Locale } from '@/consts';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const all = await getCollection('projects', ({ id }) => id.startsWith('en/') || id.startsWith('fr/'));
+const inLocale = all.filter((p) => p.id.startsWith(`${locale}/`));
+const seen = new Set(inLocale.map(sharedSlug));
+const fallbackEn = locale === 'fr'
+  ? all.filter((p) => p.id.startsWith('en/') && !seen.has(sharedSlug(p)))
+  : [];
+const merged = [...inLocale, ...fallbackEn];
+
+const sorted = merged
+  .slice()
+  .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+
+const featured = sorted.filter((p) => p.data.featured);
+const other = sorted.filter((p) => !p.data.featured);
+
+const bannerArt = [
+  '                _         _',
+  ' _ __ _ _ ___ (_)___ __| |_ ___',
+  "| '_ \\ '_/ _ \\| / -_) _| / _(_-<",
+  '| .__/_| \\___// \\___\\__|\\__/__/',
+  '|_|         |__/',
+].join('\n');
+
+const skillItems = [
+  { titleKey: 'projects.skills.docker.title', bodyKey: 'projects.skills.docker.body' },
+  { titleKey: 'projects.skills.mc.title',     bodyKey: 'projects.skills.mc.body' },
+  { titleKey: 'projects.skills.mail.title',   bodyKey: 'projects.skills.mail.body' },
+  { titleKey: 'projects.skills.ai.title',     bodyKey: 'projects.skills.ai.body' },
+] as const;
+---
+
+<Base
+  title={t('projects.title', locale)}
+  description={t('projects.description', locale)}
+  locale={locale}
+>
+  <Banner srLabel={t('projects.title', locale)}>{bannerArt}</Banner>
+
+  <p>{t('projects.intro', locale)}</p>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="featured">
+    <Prompt label={t('projects.section.featured', locale)} id="featured" />
+    {featured.length === 0 ? (
+      <p class="empty">{t('projects.empty.featured', locale)}</p>
+    ) : (
+      <ul class="card-list" role="list">
+        {featured.map((p) => {
+          const slug = sharedSlug(p);
+          const entryLoc: Locale = p.id.startsWith('fr/') ? 'fr' : 'en';
+          return (
+            <li>
+              <ProjectCard
+                href={`/${entryLoc}/projects/${slug}`}
+                title={p.data.title}
+                status={p.data.status}
+                role={p.data.role}
+                year={p.data.year}
+                summary={p.data.summary}
+                tech={p.data.tech}
+                featured
+              />
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="other-work">
+    <Prompt label={t('projects.section.other', locale)} id="other-work" />
+    {other.length === 0 ? (
+      <p class="empty">{t('projects.empty.other', locale)}</p>
+    ) : (
+      <ul class="card-list" role="list">
+        {other.map((p) => {
+          const slug = sharedSlug(p);
+          const entryLoc: Locale = p.id.startsWith('fr/') ? 'fr' : 'en';
+          return (
+            <li>
+              <ProjectCard
+                href={`/${entryLoc}/projects/${slug}`}
+                title={p.data.title}
+                status={p.data.status}
+                role={p.data.role}
+                year={p.data.year}
+                summary={p.data.summary}
+                tech={p.data.tech}
+              />
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="skill-areas">
+    <Prompt label={t('projects.section.skills', locale)} id="skill-areas" />
+    <p class="skill-intro">{t('projects.skills.intro', locale)}</p>
+    <dl class="skills">
+      {skillItems.map((s) => (
+        <div class="skills__item">
+          <dt>{t(s.titleKey, locale)}</dt>
+          <dd>{t(s.bodyKey, locale)}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .card-list {
+    list-style: none;
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  @media (min-width: 768px) {
+    .card-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .empty {
+    color: var(--fg-dim);
+    margin: 0;
+  }
+
+  .skill-intro {
+    margin: 0 0 var(--space-2);
+  }
+  .skills {
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .skills__item { margin: 0; }
+  .skills__item dt {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .skills__item dt::before {
+    content: '>> ';
+    color: var(--accent);
+  }
+  .skills__item dd {
+    margin: var(--space-1) 0 0;
+    color: var(--fg);
+  }
+</style>

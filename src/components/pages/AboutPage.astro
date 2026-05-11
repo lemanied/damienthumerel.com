@@ -1,0 +1,257 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import { type Locale } from '@/consts';
+import { t, localizePath } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const bannerArt = [
+  '╔═╗┌┐ ┌─┐┬ ┬┌┬┐',
+  '╠═╣├┴┐│ ││ │ │ ',
+  '╩ ╩└─┘└─┘└─┘ ┴ ',
+].join('\n');
+
+const skillsByLocale = {
+  en: [
+    { groupKey: 'about.skills.systems', items: 'Linux, Proxmox, Docker, Android, Caddy, Tailscale, Matrix, Nginx' },
+    { groupKey: 'about.skills.dev',     items: 'Python, Java, Bash, C#' },
+    { groupKey: 'about.skills.tools',   items: 'git, tmux, SSH, systemd' },
+    { groupKey: 'about.skills.languages', items: t('about.skills.languages.value', 'en') },
+  ],
+  fr: [
+    { groupKey: 'about.skills.systems', items: 'Linux, Proxmox, Docker, Android, Caddy, Tailscale, Matrix, Nginx' },
+    { groupKey: 'about.skills.dev',     items: 'Python, Java, Bash, C#' },
+    { groupKey: 'about.skills.tools',   items: 'git, tmux, SSH, systemd' },
+    { groupKey: 'about.skills.languages', items: t('about.skills.languages.value', 'fr') },
+  ],
+} as const;
+
+const skills = skillsByLocale[locale];
+
+const socials = [
+  { tKey: 'about.socials.label.github',  href: 'https://github.com/lemanied' },
+  { tKey: 'about.socials.label.email',   href: 'mailto:damien.thumerel@gmail.com' },
+  { tKey: 'about.socials.label.matrix',  href: localizePath('/contact', locale) },
+  { tKey: 'about.socials.label.discord', href: localizePath('/contact', locale) },
+] as const;
+---
+
+<Base
+  title={t('about.title', locale)}
+  description={t('about.description', locale)}
+  locale={locale}
+  person
+>
+  <Banner srLabel={t('about.title', locale)}>{bannerArt}</Banner>
+
+  {locale === 'en' ? (
+    <>
+      <p>
+        I'm Damien, an IT/systems administrator based in Quebec. I build and run
+        small projects for fun and for work. Homelabs, game servers,
+        community sites (you name it). Also I write code when the job needs it.
+      </p>
+      <p>
+        Most of what I do starts on a bare-metal server I own (my good "old" server), behind a Caddy reverse
+        proxy and a Tailscale + Twingate VPNs. After that, the projects are used by clients or among friends. 
+        The aesthetic of the website is CLI-shaped because that's how I operate most of the time: 
+        terminal, SSH, markdown, bare bone text.
+      </p>
+      <p>
+        I take freelance work today (web, small-scale infra, game-server setups)
+        and I'm positioning for a remote full-time IT / systems role from
+        2027 onward. If either fits what you're looking for, the fastest
+        way in is <a href={localizePath('/contact', locale)}>/contact</a>.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        Je suis Damien, administrateur TI/systèmes basé au Québec. Je construis et
+        opère des petits projects pour le plaisir et le travail. Homelabs,
+        serveurs de jeu, sites communautaires. Aussi j'écris du code quand le
+        projet l'exige.
+      </p>
+      <p>
+        L'essentiel de ce que je fais démarre sur un serveur bare-metal (mon bon "vieux" serveur) qui
+        m'appartient, derrière un reverse proxy Caddy et des VPNs Twingate +
+        Tailscale. Après ça, les projets sont utilisés par des clients ou parmi mes amis.
+        L'esthétique du site ligne-de-commande parce que c'est comme ça que j'opère : 
+        terminal, SSH, markdown, texte brut.
+      </p>
+      <p>
+        Je prends des jobs freelance aujourd'hui (web, petite infra,
+        configuration de serveurs de jeu) et je me positionne pour un rôle TI /
+        systèmes à temps plein en télétravail ou présentiel à partir de 2027. Si l'un ou
+        l'autre correspond, le meilleur point de contact est
+        <a href={localizePath('/contact', locale)}>/contact</a>.
+      </p>
+    </>
+  )}
+
+  <AsciiDivider />
+
+  <section aria-labelledby="skills">
+    <Prompt label={t('about.skills', locale)} id="skills" />
+    <dl class="skills">
+      {skills.map((s) => (
+        <div class="skills__row">
+          <dt class="skills__group">{t(s.groupKey, locale)}</dt>
+          <dd class="skills__items">{s.items}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="background">
+    <Prompt label={t('about.background', locale)} id="background" />
+    {locale === 'en' ? (
+      <>
+        <p>
+          I started making servers and operating them at a young age. I was barely
+          9 years old when I started getting into computers and coding.
+          I made Minecraft communities - custom plugins, BungeeCord routing,
+          plumbing behind them. That's where I learned that the servers are rarely 
+          the hard part; the software and network layers are.
+        </p>
+        <p>
+          Since then, I've mostly contributed to friends' projects. Sometime I am lucky
+          and I find projects by word of mouth. Recently, I've led development on HytaleHQ 
+          (an Hytale server that unfortunately didn't survive time), built a persistent homelab
+          across a handful of services I actually rely on (Outline, Planka, Caddy, Tailscale),
+          and taken freelance contracts when the scope fits solo delivery.
+        </p>
+        <p>
+          The thing that ignites my flame is simply using CLIs and installing stuffs that work
+          together.  As long as there is tinkering and pizza, I am ready to install any
+          stack needed or help people fix their VPS.
+        </p>
+      </>
+    ) : (
+      <>
+        <p>
+          J'ai commencé à faire des serveurs et les opérer très jeune. J'avais
+          à peine 9 ans quand j'ai commencé à m'intéressé aux ordinateurs et coder.
+          J'ai créé des communautés Minecraft - plugins personnalisés, BungeeCord,
+          et la plomberie derrière. C'est là que j'ai appris que les serveurs ne
+          sont que rarement la partie difficile ; c'est les couches logicielles et réseaux
+          qui le sont.
+        </p>
+        <p>
+          Depuis, j'ai principalement contribué à des projets d'amis. Parfois je suis chanceux
+          et trouve des projets grâce au bouche à oreille. Récemment, j'ai été Développeur en chef
+          sur HytaleHQ (un serveur Hytale qui n'a malheureusement pas survécu l'épreuve du temps),
+          construis un homelab hébergent plusieurs services que j'utilise au quotidien (Outline,
+          Planka, Caddy, Tailscale) et j'ai pris des contrats freelance quand ça adonne.
+        </p>
+        <p>
+          La principle chose qui allume ma flamme est simplement utiliser des terminaux et installer
+          des logiciels qui fonctionnent ensemble. Aussi longtemps qu'il y a du bidouillage et de la
+          pizza, je suis prêt à installer n'importe quelle applications ou aider les gens à réparer
+          leur VPS.
+        </p>
+      </>
+    )}
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="socials">
+    <Prompt label={t('about.socials', locale)} id="socials" />
+    <ul class="socials" role="list">
+      {socials.map((s) => (
+        <li>
+          <a href={s.href} rel={s.href.startsWith('http') ? 'me noopener' : undefined}>
+            <span aria-hidden="true">[</span>{t(s.tKey, locale)}<span aria-hidden="true">]</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="meta">
+      {t('about.socials.meta.before', locale)}
+      <a href={localizePath('/contact', locale)}>{localizePath('/contact', locale)}</a>.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .skills {
+    margin: 0 0 var(--space-2);
+    display: grid;
+    gap: var(--space-1);
+  }
+  .skills__row {
+    display: grid;
+    grid-template-columns: 14ch 1fr;
+    gap: var(--space-1);
+    align-items: baseline;
+  }
+  @media (max-width: 540px) {
+    .skills__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+  .skills__group {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .skills__group::before {
+    content: '│ ';
+    color: var(--border);
+  }
+  .skills__items {
+    margin: 0;
+    color: var(--fg);
+  }
+
+  .edu {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-2);
+  }
+  .edu > li {
+    padding-left: var(--space-2);
+    position: relative;
+  }
+  .edu > li::before {
+    content: '├─ ';
+    color: var(--border);
+    position: absolute;
+    left: 0;
+  }
+  .edu > li:last-child::before {
+    content: '└─ ';
+  }
+  .edu strong { color: var(--accent); font-weight: 700; }
+  .edu__status { color: var(--fg-dim); }
+
+  .socials {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-2);
+  }
+  .socials a {
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+  .socials a:hover { color: var(--accent); }
+
+  .meta {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    margin: var(--space-1) 0 0;
+  }
+</style>

@@ -1,0 +1,23 @@
+---
+type Status = 'active' | 'archived' | 'past';
+
+interface Props {
+  status: Status;
+}
+
+const { status } = Astro.props;
+---
+
+<span class:list={['status', `status--${status}`]}>[{status}]</span>
+
+<style>
+  .status {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .status--active   { color: var(--success); }
+  .status--archived { color: var(--fg-dim); }
+  .status--past     { color: var(--accent-dim); }
+</style>

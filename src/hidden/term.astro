@@ -1,0 +1,115 @@
+---
+import Base from '@/layouts/Base.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { sharedSlug } from '@/content/config';
+import { SITE } from '@/consts';
+import '@/styles/terminal.css';
+import type { TermData, TermProject } from '@/components/terminal/commands';
+
+const nowEntry = await getEntry('now', 'en');
+const nowBody = nowEntry?.body ?? '';
+
+const enProjects = (await getCollection('projects', ({ id }) => id.startsWith('en/')))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const projects: TermProject[] = enProjects.map((p) => ({
+  slug: sharedSlug(p),
+  title: p.data.title,
+  summary: p.data.summary,
+  status: p.data.status,
+  role: p.data.role,
+  year: String(p.data.year),
+  tech: [...p.data.tech],
+}));
+
+const aboutParagraphs: string[] = [
+  'TODO: write the terminal bio here.',
+];
+
+const contactLines = [
+  'email    = damien.thumerel@gmail.com',
+  'github   = https://github.com/lemanied',
+  'matrix   = (ask via email or matrix on /en/contact)',
+  'discord  = (ask via email or matrix on /en/contact)',
+  '',
+  'timezone = America/Montreal',
+  'response = 24-48h on weekdays',
+];
+
+const secretLines: string[] = [
+  'TODO: secret message.',
+];
+
+const termData: TermData = {
+  motd: `last login: ${new Date().toUTCString()} on ttyS0`,
+  about: aboutParagraphs,
+  now: nowBody,
+  contact: contactLines,
+  secret: secretLines,
+  projects,
+  uname: 'damienthumerel 0.1.0-web #1 SMP Astro x86_64 GNU/Web',
+  version: '0.1.0',
+};
+
+const termDataJson = JSON.stringify(termData);
+---
+
+<Base
+  title="terminal"
+  description="Terminal."
+  noindex
+  transitions={false}
+>
+  <section class="term" data-term-root aria-label="terminal easter egg">
+    <div class="term__screen" data-term-screen aria-live="polite" aria-atomic="false"></div>
+
+    <p class="term__skip" data-term-skip>(press any key to skip the boot sequence)</p>
+
+    <form class="term__form term__form--hidden" data-term-form autocomplete="off">
+      <label class="visually-hidden" for="term-input">terminal input</label>
+      <span class="term__prefix" data-term-prefix>guest@damienthumerel:~$</span>
+      <input
+        class="term__input"
+        id="term-input"
+        name="command"
+        type="text"
+        data-term-input
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        inputmode="text"
+      />
+    </form>
+  </section>
+
+  <noscript>
+    <section class="term term-noscript" aria-label="terminal fallback">
+      <p>
+        This page is an interactive terminal that needs JavaScript. Here is
+        the equivalent content as plain text.
+      </p>
+
+      <h2>about.txt</h2>
+      <pre>{aboutParagraphs.join('\n')}</pre>
+
+      <h2>now.md</h2>
+      <pre>{nowBody}</pre>
+
+      <h2>contact.conf</h2>
+      <pre>{contactLines.join('\n')}</pre>
+
+      <h2>projects/</h2>
+      <pre>{projects.map((p) => `${p.slug.padEnd(16, ' ')}  ${p.summary}`).join('\n')}</pre>
+
+      <p>
+        Back to <a href={`/en/`}>{SITE.url.replace(/^https?:\/\//, '')}</a>.
+      </p>
+    </section>
+  </noscript>
+
+  <script is:inline type="application/json" id="term-data" set:html={termDataJson} />
+  <script>
+    import '@/components/terminal/terminal';
+  </script>
+</Base>

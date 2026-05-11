@@ -1,0 +1,74 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import { getEntry } from 'astro:content';
+import { type Locale } from '@/consts';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const entry = await getEntry('now', locale);
+if (!entry) throw new Error(`missing now/${locale} content entry`);
+const { Content: NowContent } = await entry.render();
+
+const bannerArt = [
+  '┌┐┌┌─┐┬ ┬',
+  '││││ │││││',
+  '┘└┘└─┘└┴┘ ',
+].join('\n');
+
+const lastUpdated = entry.data.last_updated.toISOString().slice(0, 10);
+---
+
+<Base
+  title={t('now.title', locale)}
+  description={t('now.description', locale)}
+  locale={locale}
+>
+  <Banner srLabel={t('now.title', locale)}>{bannerArt}</Banner>
+
+  <p class="last-updated">
+    <span class="last-updated__label" aria-hidden="true">&gt; </span>
+    {t('now.last_updated', locale)} <time datetime={lastUpdated}>{lastUpdated}</time>
+  </p>
+
+  <p>
+    {t('now.intro.before', locale)}
+    {' '}<a href="https://nownownow.com/about" rel="noopener">{t('now.intro.link', locale)}</a>{t('now.intro.after', locale)}
+  </p>
+
+  <AsciiDivider />
+
+  <section class="now-body" aria-labelledby="now-body">
+    <Prompt label={t('now.body.heading', locale)} id="now-body" />
+    <NowContent />
+  </section>
+</Base>
+
+<style>
+  .last-updated {
+    color: var(--fg-dim);
+    font-size: 0.95rem;
+    margin: 0 0 var(--space-2);
+  }
+  .last-updated__label { color: var(--accent); }
+  .last-updated time { color: var(--fg); }
+
+  .now-body :global(h2) {
+    font-size: 1.1rem;
+    margin: var(--space-3) 0 var(--space-1);
+  }
+  .now-body :global(h2::before) {
+    content: '>> ';
+    color: var(--accent);
+  }
+  .now-body :global(hr) {
+    margin: var(--space-3) 0;
+  }
+</style>

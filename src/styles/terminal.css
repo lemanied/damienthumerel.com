@@ -1,0 +1,114 @@
+.term {
+  --term-prompt-color: var(--accent);
+  --term-fg: var(--fg);
+  --term-dim: var(--fg-dim);
+  --term-err: var(--danger);
+  --term-ok: var(--success);
+
+  font-family: var(--font-mono);
+  color: var(--term-fg);
+  background: var(--bg);
+  padding: var(--space-3) var(--content-pad);
+  max-width: var(--content-width);
+  margin: 0 auto;
+  min-height: calc(100vh - 8rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.term__screen {
+  flex: 1 1 auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.term__line {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.term__line--prompt {
+  color: var(--term-prompt-color);
+}
+
+.term__line--out {
+  color: var(--term-fg);
+}
+
+.term__line--dim {
+  color: var(--term-dim);
+}
+
+.term__line--err {
+  color: var(--term-err);
+}
+
+.term__line--ok {
+  color: var(--term-ok);
+}
+
+.term__line--motd {
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.term__line--boot { color: var(--term-dim); }
+.term__line--boot .ok { color: var(--term-ok); font-weight: 700; }
+
+.term__form {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5ch;
+  margin-top: var(--space-1);
+}
+
+.term__prefix {
+  color: var(--term-prompt-color);
+  flex: 0 0 auto;
+  white-space: pre;
+}
+
+.term__input {
+  flex: 1 1 auto;
+  background: transparent;
+  color: var(--term-fg);
+  border: 0;
+  outline: none;
+  font: inherit;
+  padding: 0;
+  caret-color: var(--accent);
+  min-width: 0;
+}
+
+.term__input:focus { outline: none; }
+
+.term__form--hidden { display: none; }
+
+.term__skip {
+  color: var(--term-dim);
+  font-size: 0.9rem;
+  margin-top: var(--space-2);
+}
+
+.term-noscript {
+  padding: 0;
+}
+.term-noscript h2 {
+  color: var(--accent);
+  font-size: 1rem;
+  margin: var(--space-3) 0 var(--space-1);
+}
+.term-noscript pre {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-2);
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term__line,
+  .term__line--boot { animation: none !important; transition: none !important; }
+}

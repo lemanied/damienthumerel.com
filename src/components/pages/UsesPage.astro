@@ -1,0 +1,231 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import Tag from '@/components/ui/Tag.astro';
+import { type Locale } from '@/consts';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const bannerArt = [
+  '┬ ┬┌─┐┌─┐┌─┐',
+  '│ │└─┐├┤ └─┐',
+  '└─┘└─┘└─┘└─┘',
+].join('\n');
+
+const hardware = locale === 'en'
+  ? [
+      { label: 'chassis',  value: 'Good old 2008 ATX case' },
+      { label: 'cpu',      value: 'AMD Ryzen 5 5600GT' },
+      { label: 'ram',      value: '128GB DDR4 3600MHz' },
+      { label: 'storage',  value: 'Samsung 870 EVO for the OS, 1x 16TB Seagate HDD for data' },
+      { label: 'network',  value: 'i310 for the VMs, on-board for OS' },
+    ]
+  : [
+      { label: 'châssis',  value: 'Bon vieux case ATX de 2008' },
+      { label: 'cpu',      value: 'AMD Ryzen 5 5600GT' },
+      { label: 'ram',      value: '128GB DDR4 3600MHz' },
+      { label: 'stockage', value: 'Samsung 870 EVO pour l\'OS, 1x 16TB Seagate HDD pour les données' },
+      { label: 'réseau',   value: 'i310 pour les VMs, carte intégrée pour l\'OS' },
+    ];
+
+const platform = locale === 'en'
+  ? [
+      { label: 'host os',       value: 'Proxmox VE' },
+      { label: 'containers',    value: 'Docker on Ubuntu 24.04 Server' },
+      { label: 'vpn',           value: 'Tailscale and Twingate' },
+      { label: 'reverse proxy', value: 'Caddy' },
+      ]
+  : [
+      { label: 'hôte os',          value: 'Proxmox VE' },
+      { label: 'conteneurs',       value: 'Docker sur Ubuntu 24.04 Server' },
+      { label: 'vpn',              value: 'Tailscale et Twingate' },
+      { label: 'reverse proxy',    value: 'Caddy' },
+      ];
+
+const services = locale === 'en'
+  ? [
+      { name: 'Outline',     what: 'wiki for all my projects.' },
+      { name: 'Planka',      what: 'Kanban board for the projects.' },
+      { name: 'Caddy',       what: 'reverse proxy for everything above.' },
+      { name: 'Tailscale and Twingate',   what: 'the way I reach all my services from outside.' },
+      { name: 'Pterodactyl', what: 'Self-host friends game servers or test'},
+    ]
+  : [
+      { name: 'Outline',     what: 'wiki pour tout mes projets.' },
+      { name: 'Planka',      what: 'Kanban board pour les projets' },
+      { name: 'Caddy',       what: 'reverse proxy pour tout.' },
+      { name: 'Tailscale et Twingate',   what: 'la façon que je me connecte à tout mes services quand je touche du gazon' },
+      { name: 'Pterodactyl', what: 'Pour les serveurs entre amis et tester'},
+    ];
+
+const dev = locale === 'en'
+  ? [
+      { label: 'os',        value: 'Windows 11' },
+      { label: 'editor',    value: 'JetBrains suite and VS Code' },
+      { label: 'shell',     value: 'bash from WSL2 and Powershell' },
+      { label: 'terminal',  value: 'Terminal from Windows' },
+      { label: 'browser',   value: 'Firefox, and Chrome for testing' },
+      { label: 'notable',   value: 'git, gh, docker, anaconda' },
+    ]
+  : [
+      { label: 'os',        value: 'Windows 11' },
+      { label: 'editor',    value: 'Suite JetBrains et VS Code' },
+      { label: 'shell',     value: 'bash grâce à WSL2 et Powershell' },
+      { label: 'terminal',  value: 'Terminal de Windows' },
+      { label: 'browser',   value: 'Firefox, et Chrome pour le test' },
+      { label: 'notable',   value: 'git, gh, docker, anaconda' },
+    ];
+---
+
+<Base
+  title={t('uses.title', locale)}
+  description={t('uses.description', locale)}
+  locale={locale}
+>
+  <Banner srLabel={t('uses.title', locale)}>{bannerArt}</Banner>
+
+  <p>
+    {t('uses.intro.before', locale)}
+    {' '}<a href="https://uses.tech/" rel="noopener">{t('uses.intro.link', locale)}</a>{t('uses.intro.after', locale)}
+  </p>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="homelab-hardware">
+    <Prompt label={t('uses.section.hardware', locale)} id="homelab-hardware" />
+    <dl class="kv">
+      {hardware.map((h) => (
+        <div class="kv__row">
+          <dt class="kv__label">{h.label}</dt>
+          <dd class="kv__value">{h.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="platform">
+    <Prompt label={t('uses.section.platform', locale)} id="platform" />
+    <dl class="kv">
+      {platform.map((p) => (
+        <div class="kv__row">
+          <dt class="kv__label">{p.label}</dt>
+          <dd class="kv__value">{p.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="services">
+    <Prompt label={t('uses.section.services', locale)} id="services" />
+    <ul class="services" role="list">
+      {services.map((s) => (
+        <li>
+          <span class="services__name">{s.name}</span>
+          <span class="services__sep" aria-hidden="true"> &mdash; </span>
+          <span class="services__what">{s.what}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="dev-machine">
+    <Prompt label={t('uses.section.dev', locale)} id="dev-machine" />
+    <dl class="kv">
+      {dev.map((d) => (
+        <div class="kv__row">
+          <dt class="kv__label">{d.label}</dt>
+          <dd class="kv__value">{d.value}</dd>
+        </div>
+      ))}
+    </dl>
+    <p class="inline-tags">
+      {t('uses.dev.daily', locale)} <Tag label="nvim" tone="dim" />
+      <Tag label="tmux" tone="dim" />
+      <Tag label="zsh" tone="dim" />
+      <Tag label="git" tone="dim" />
+      <Tag label="ssh" tone="dim" />
+      <Tag label="docker" tone="dim" />
+    </p>
+  </section>
+</Base>
+
+<style>
+  .kv {
+    margin: 0 0 var(--space-2);
+    display: grid;
+    gap: var(--space-1);
+  }
+  .kv__row {
+    display: grid;
+    grid-template-columns: 14ch 1fr;
+    gap: var(--space-1);
+    align-items: baseline;
+  }
+  @media (max-width: 540px) {
+    .kv__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+  .kv__label {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .kv__label::before {
+    content: '│ ';
+    color: var(--border);
+  }
+  .kv__value {
+    margin: 0;
+    color: var(--fg);
+  }
+
+  .services {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-2);
+  }
+  .services > li {
+    padding-left: var(--space-2);
+    position: relative;
+    margin-bottom: var(--space-1);
+  }
+  .services > li::before {
+    content: '├─ ';
+    color: var(--border);
+    position: absolute;
+    left: 0;
+  }
+  .services > li:last-child::before {
+    content: '└─ ';
+  }
+  .services__name {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .services__sep { color: var(--fg-dim); }
+  .services__what { color: var(--fg); }
+
+  .inline-tags {
+    margin: var(--space-2) 0 0;
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-1);
+  }
+</style>

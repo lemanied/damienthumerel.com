@@ -1,0 +1,25 @@
+---
+interface Props {
+  label: string;
+  tone?: 'default' | 'dim';
+}
+
+const { label, tone = 'default' } = Astro.props;
+---
+
+<span class:list={['tag', `tag--${tone}`]}>[<span class="tag__label">{label}</span>]</span>
+
+<style>
+  .tag {
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    white-space: nowrap;
+  }
+  .tag--dim {
+    color: var(--fg-dim);
+  }
+  .tag__label {
+    color: inherit;
+  }
+</style>

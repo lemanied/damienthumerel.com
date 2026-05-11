@@ -1,0 +1,63 @@
+---
+import { SITE, SOCIALS } from '@/consts';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer__divider" aria-hidden="true">────────────────────────────────────────────────────────────────────────────────</div>
+
+  <div class="footer__row">
+    <ul class="footer__socials" aria-label="social links">
+      {SOCIALS.map((s) => (
+        <li>
+          <a href={s.href} class="footer__link" rel={s.href.startsWith('http') ? 'me noopener' : undefined}>
+            <span aria-hidden="true">[</span>{s.label}<span aria-hidden="true">]</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="footer__copy">&copy; {year} {SITE.name}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    width: 100%;
+    max-width: var(--content-width);
+    margin: var(--space-4) auto 0;
+    padding: 0 var(--content-pad) var(--space-3);
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+  }
+  .footer__divider {
+    color: var(--border);
+    overflow: hidden;
+    white-space: nowrap;
+    margin-bottom: var(--space-2);
+  }
+  .footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .footer__socials {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-2);
+  }
+  .footer__link {
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+  .footer__link:hover { color: var(--accent); }
+  .footer__copy {
+    margin: 0;
+    color: var(--fg-dim);
+  }
+</style>

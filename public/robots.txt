@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /_term
+
+Sitemap: https://damienthumerel.com/sitemap-index.xml

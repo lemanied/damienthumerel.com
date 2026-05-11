@@ -1,0 +1,169 @@
+---
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import StatusBadge from '@/components/ui/StatusBadge.astro';
+import Tag from '@/components/ui/Tag.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { sharedSlug } from '@/content/config';
+import { t } from '@/i18n/ui';
+
+const LOCALE = 'fr' as const;
+
+export async function getStaticPaths() {
+  const fr = await getCollection('projects', ({ id }) => id.startsWith('fr/'));
+  const sorted = fr
+    .slice()
+    .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+
+  return sorted.map((entry, i) => ({
+    params: { slug: sharedSlug(entry) },
+    props: {
+      entry,
+      prev: i > 0 ? sorted[i - 1] : undefined,
+      next: i < sorted.length - 1 ? sorted[i + 1] : undefined,
+    },
+  }));
+}
+
+type Entry = CollectionEntry<'projects'>;
+interface Props {
+  entry: Entry;
+  prev?: Entry;
+  next?: Entry;
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await entry.render();
+const { title, status, role, year, tech, summary, links } = entry.data;
+---
+
+<Base title={title} description={summary} locale={LOCALE}>
+  <Banner srLabel={title}>{title}</Banner>
+
+  <p class="meta-strip" aria-label="métadonnées du projet">
+    <span>{role}</span>
+    <span aria-hidden="true"> &middot; </span>
+    <span>{year}</span>
+    <span aria-hidden="true"> &middot; </span>
+    <StatusBadge status={status} />
+    {tech.length > 0 && (
+      <>
+        <span aria-hidden="true"> &middot; </span>
+        <span class="meta-strip__tags">
+          {tech.map((tg) => <Tag label={tg} tone="dim" />)}
+        </span>
+      </>
+    )}
+  </p>
+
+  <AsciiDivider />
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  {links && (links.repo || links.live || links.demo) && (
+    <>
+      <AsciiDivider />
+      <section aria-labelledby="links">
+        <h2 id="links" class="section-heading">
+          <span aria-hidden="true">&gt; </span>{t('projects.detail.links', LOCALE)}
+        </h2>
+        <ul class="links">
+          {links.repo && <li><a href={links.repo} rel="noopener">{t('projects.detail.link.repo', LOCALE)}</a></li>}
+          {links.live && <li><a href={links.live} rel="noopener">{t('projects.detail.link.live', LOCALE)}</a></li>}
+          {links.demo && <li><a href={links.demo} rel="noopener">{t('projects.detail.link.demo', LOCALE)}</a></li>}
+        </ul>
+      </section>
+    </>
+  )}
+
+  <AsciiDivider />
+
+  <nav class="pager" aria-label="projets adjacents">
+    <div class="pager__prev">
+      {prev ? (
+        <a href={`/${LOCALE}/projects/${sharedSlug(prev)}`}>
+          <span aria-hidden="true">&larr; </span>{prev.data.title}
+        </a>
+      ) : (
+        <span class="pager__empty">{t('projects.detail.pager.first', LOCALE)}</span>
+      )}
+    </div>
+    <div class="pager__next">
+      {next ? (
+        <a href={`/${LOCALE}/projects/${sharedSlug(next)}`}>
+          {next.data.title}<span aria-hidden="true"> &rarr;</span>
+        </a>
+      ) : (
+        <span class="pager__empty">{t('projects.detail.pager.last', LOCALE)}</span>
+      )}
+    </div>
+  </nav>
+
+  <p class="back"><a href={`/${LOCALE}/projects`}>{t('projects.detail.back', LOCALE)}</a></p>
+</Base>
+
+<style>
+  .meta-strip {
+    color: var(--fg-dim);
+    font-size: 0.95rem;
+    margin: 0 0 var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-1);
+  }
+  .meta-strip__tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-1);
+  }
+
+  .prose :global(h2) {
+    font-size: 1.15rem;
+    margin: var(--space-3) 0 var(--space-1);
+  }
+  .prose :global(h2::before) {
+    content: '>> ';
+    color: var(--accent);
+  }
+  .prose :global(h3) {
+    font-size: 1.05rem;
+  }
+  .prose :global(h3::before) {
+    content: '>>> ';
+    color: var(--accent);
+  }
+
+  .section-heading {
+    color: var(--accent);
+    margin: 0 0 var(--space-2);
+    font-size: 1.15rem;
+  }
+
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .pager {
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: 1fr 1fr;
+    margin: var(--space-2) 0;
+  }
+  .pager__prev { text-align: left; }
+  .pager__next { text-align: right; }
+  .pager__empty { color: var(--fg-dim); }
+
+  .back {
+    color: var(--fg-dim);
+    margin: var(--space-2) 0 0;
+  }
+</style>

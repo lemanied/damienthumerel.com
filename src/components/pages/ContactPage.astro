@@ -1,0 +1,173 @@
+---
+
+import Base from '@/layouts/Base.astro';
+import Banner from '@/components/ui/Banner.astro';
+import Prompt from '@/components/ui/Prompt.astro';
+import AsciiDivider from '@/components/ui/AsciiDivider.astro';
+import { type Locale } from '@/consts';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const bannerArt = [
+  '┌─┐┌─┐┌┐┌┌┬┐┌─┐┌─┐┌┬┐',
+  '│  │ ││││ │ ├─┤│   │ ',
+  '└─┘└─┘┘└┘ ┴ ┴ ┴└─┘ ┴ ',
+].join('\n');
+
+type Channel = { label: string; value: string; href?: string; noteKey: string };
+
+const channels: Channel[] = [
+  {
+    label: locale === 'fr' ? 'courriel' : 'email',
+    value: 'damien.thumerel@gmail.com',
+    href: 'mailto:damien.thumerel@gmail.com',
+    noteKey: 'contact.channel.email.note',
+  },
+  {
+    label: 'github',
+    value: 'https://github.com/lemanied',
+    href: 'https://github.com/lemanied',
+    noteKey: 'contact.channel.github.note',
+  },
+  {
+    label: 'matrix',
+    value: '@manied:matrix.org',
+    noteKey: 'contact.channel.matrix.note',
+  },
+  {
+    label: 'discord',
+    value: '@Manied',
+    noteKey: 'contact.channel.discord.note',
+  },
+];
+
+const avail = [
+  { labelKey: 'contact.avail.taking.label',     bodyKey: 'contact.avail.taking.body' },
+  { labelKey: 'contact.avail.not_taking.label', bodyKey: 'contact.avail.not_taking.body' },
+  { labelKey: 'contact.avail.response.label',   bodyKey: 'contact.avail.response.body' },
+  { labelKey: 'contact.avail.timezone.label',   bodyKey: 'contact.avail.timezone.body' },
+] as const;
+---
+
+<Base
+  title={t('contact.title', locale)}
+  description={t('contact.description', locale)}
+  locale={locale}
+>
+  <Banner srLabel={t('contact.title', locale)}>{bannerArt}</Banner>
+
+  <p>{t('contact.intro', locale)}</p>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="channels">
+    <Prompt label={t('contact.section.channels', locale)} id="channels" />
+    <dl class="channels">
+      {channels.map((c) => (
+        <div class="channels__row">
+          <dt class="channels__label">{c.label}</dt>
+          <dd class="channels__value">
+            {c.href
+              ? <a href={c.href} rel={c.href.startsWith('http') ? 'me noopener' : undefined}>{c.value}</a>
+              : <code>{c.value}</code>
+            }
+            <span class="channels__note"> &mdash; {t(c.noteKey, locale)}</span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="availability">
+    <Prompt label={t('contact.section.availability', locale)} id="availability" />
+    <ul class="avail" role="list">
+      {avail.map((a) => (
+        <li>
+          <strong>{t(a.labelKey, locale)}</strong> {t(a.bodyKey, locale)}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <AsciiDivider />
+
+  <section aria-labelledby="pgp">
+    <Prompt label={t('contact.section.pgp', locale)} id="pgp" />
+    <p class="meta">{t('contact.pgp.body', locale)}</p>
+  </section>
+</Base>
+
+<style>
+  .channels {
+    margin: 0 0 var(--space-2);
+    display: grid;
+    gap: var(--space-1);
+  }
+  .channels__row {
+    display: grid;
+    grid-template-columns: 12ch 1fr;
+    gap: var(--space-1);
+    align-items: baseline;
+  }
+  @media (max-width: 540px) {
+    .channels__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+  .channels__label {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .channels__label::before {
+    content: '│ ';
+    color: var(--border);
+  }
+  .channels__value {
+    margin: 0;
+    color: var(--fg);
+  }
+  .channels__value code {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    padding: 0 0.4ch;
+  }
+  .channels__note {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+  }
+
+  .avail {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-2);
+  }
+  .avail > li {
+    padding-left: var(--space-2);
+    position: relative;
+    margin-bottom: var(--space-1);
+  }
+  .avail > li::before {
+    content: '│ ';
+    color: var(--border);
+    position: absolute;
+    left: 0;
+  }
+  .avail strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .meta {
+    color: var(--fg-dim);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+</style>

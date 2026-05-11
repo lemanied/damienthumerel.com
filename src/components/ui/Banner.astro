@@ -1,0 +1,38 @@
+---
+interface Props {
+  srLabel: string;
+  level?: 1 | 2;
+}
+
+const { srLabel, level = 1 } = Astro.props;
+const Heading = level === 1 ? 'h1' : 'h2';
+---
+
+<div class="banner">
+  <Heading class="visually-hidden">{srLabel}</Heading>
+  <pre class="banner__art" aria-hidden="true"><slot /></pre>
+</div>
+
+<style>
+  .banner {
+    margin: var(--space-2) 0 var(--space-3);
+  }
+  .banner__art {
+    color: var(--accent);
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    line-height: 1.05;
+    overflow-x: auto;
+    white-space: pre;
+    font-size: 0.85rem;
+  }
+  @media (min-width: 768px) {
+    .banner__art {
+      font-size: 1rem;
+    }
+  }
+</style>
