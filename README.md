@@ -2,12 +2,7 @@
 
 Source of [damienthumerel.com](https://damienthumerel.com) — personal site, bilingual (EN/FR), terminal aesthetic.
 
-Built with [Astro](https://astro.build) as a static site. Intended deploy target is Cloudflare Pages, but the project is **kept local-only for now** — no git, no remote — until the design has settled (see `DESIGN.md §16` and the workflow note at the top of `ROADMAP.md`).
-
-## Design + roadmap
-
-- [`DESIGN.md`](./DESIGN.md) — full technical design
-- [`ROADMAP.md`](./ROADMAP.md) — build phases and execution tracker
+Built with [Astro](https://astro.build) as a static site. Intended deploy target is Cloudflare Pages
 
 ## Local development
 
