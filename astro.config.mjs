@@ -2,6 +2,8 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
+import cloudflare from "@astrojs/cloudflare";
+
 function injectTermRoute() {
   return {
     name: 'inject-term-route',
@@ -18,6 +20,7 @@ function injectTermRoute() {
 
 export default defineConfig({
   site: 'https://damienthumerel.com',
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'fr'],
@@ -26,6 +29,7 @@ export default defineConfig({
       redirectToDefaultLocale: false,
     },
   },
+
   integrations: [
     mdx(),
     injectTermRoute(),
@@ -37,7 +41,10 @@ export default defineConfig({
       },
     }),
   ],
+
   build: {
     inlineStylesheets: 'auto',
   },
+
+  adapter: cloudflare()
 });
