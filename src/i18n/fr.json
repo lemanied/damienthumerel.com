@@ -42,11 +42,11 @@
   "about.socials.meta.before": "Les coordonnées complètes (ID Matrix, tag Discord) sont sur",
 
   "now.title": "maintenant",
-  "now.description": "Ce sur quoi Damien travaille, ce qu’il apprend et à quoi il prête attention en ce moment. Mis à jour mensuellement.",
+  "now.description": "Ce sur quoi Damien travaille, ce qu’il apprend et à quoi il s'intéresse.",
   "now.last_updated": "dernière mise à jour :",
   "now.intro.before": "Une",
   "now.intro.link": "page /now",
-  "now.intro.after": " : ce à quoi je prête attention en ce moment, pas une rétrospective. Volontairement éphémère - si la page est périmée, la date plus haut le trahira.",
+  "now.intro.after": " : mes passe-temps actuels. ce que je fais en gros. Volontairement éphémère.",
   "now.body.heading": "statut",
 
   "uses.title": "outils",
